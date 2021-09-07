@@ -270,6 +270,16 @@ impl Model {
         handle_status(unsafe { value.set_option(self.highs.mut_ptr(), c_str.as_ptr()) });
     }
 
+    /// Check whether the primal problem is infeasible, regardless of whether it is bounded
+    pub fn check_primal_infeasible(&mut self) -> bool {
+        let has_dual_ray: *mut i32 = &mut c(0);
+        let dual_ray_value: *mut f64 = &mut 0.;
+        unsafe {
+            Highs_getDualRay(self.highs.mut_ptr(), has_dual_ray, dual_ray_value);
+            !(*has_dual_ray == 0)
+        }
+    }
+
     /// Find the optimal value for the problem
     pub fn solve(mut self) -> SolvedModel {
         unsafe {
